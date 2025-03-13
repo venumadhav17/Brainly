@@ -2,20 +2,33 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_PASSWORD } from "./config";
 
+interface AuthRequest extends Request {
+  userId?: string;
+}
+
+interface JwtPayload {
+  id: string;
+}
+
 export const userMiddleware = (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
-  const header = req.headers["authorization"];
-  const decoded = jwt.verify(header as string, JWT_PASSWORD);
-  if (decoded) {
-    //@ts-ignore
+): void => {
+  try {
+    const token = req.headers["authorization"];
+    if (!token || typeof token !== "string") {
+      res
+        .status(401)
+        .json({ message: "Authorization header is missing or invalid" });
+      return;
+    }
+    const decoded = jwt.verify(token, JWT_PASSWORD) as JwtPayload;
     req.userId = decoded.id;
     next();
-  } else {
+  } catch (error) {
     res.status(403).json({
-      message: "You are not logged in"
+      message: "Invalid or expired token"
     });
   }
 };

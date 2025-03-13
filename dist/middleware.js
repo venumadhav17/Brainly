@@ -7,16 +7,21 @@ exports.userMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = require("./config");
 const userMiddleware = (req, res, next) => {
-    const header = req.headers["authorization"];
-    const decoded = jsonwebtoken_1.default.verify(header, config_1.JWT_PASSWORD);
-    if (decoded) {
-        //@ts-ignore
+    try {
+        const token = req.headers["authorization"];
+        if (!token || typeof token !== "string") {
+            res
+                .status(401)
+                .json({ message: "Authorization header is missing or invalid" });
+            return;
+        }
+        const decoded = jsonwebtoken_1.default.verify(token, config_1.JWT_PASSWORD);
         req.userId = decoded.id;
         next();
     }
-    else {
+    catch (error) {
         res.status(403).json({
-            message: "You are not logged in"
+            message: "Invalid or expired token"
         });
     }
 };

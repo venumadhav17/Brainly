@@ -15,14 +15,27 @@ const userSchema = new Schema({
 
 export const UserModel = model("User", userSchema);
 
+const tagSchema = new Schema({
+  title: { type: String, required: true, unique: true }
+});
+
+export const TagModel = model("Tag", tagSchema);
+
 const contentSchema = new Schema({
-  title: String,
-  link: String,
+  title: { type: String, required: true },
+  link: { type: String, required: true },
+  type: { type: String, enum: ["image", "video", "article", "audio"] },
   tags: [{ type: mongoose.Types.ObjectId, ref: "Tag" }],
   userId: { type: mongoose.Types.ObjectId, ref: "User", required: true }
 });
 
 export const ContentModel = model("Content", contentSchema);
+
+const linkSchema = new Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
+});
+
+export const linkModel = model("link", linkSchema);
 /*const userSchema = new mongoose.Schema({
   username: {
     type: String,
